@@ -51,3 +51,21 @@ execute "stack" do
   })
   action :run
 end
+
+# setup environment
+
+profile_file = "/home/#{node['user']}/.profile"
+
+# swift command line env setup
+
+{
+
+  "SCREENRC" => "#{node['source_root']}/devstack/stack-screenrc",
+}.each do |var, value|
+  execute "set-env-#{var}" do
+    command "echo 'export #{var}=#{value}' >> #{profile_file}"
+    not_if "grep #{var} #{profile_file} && " \
+      "sed '/#{var}/c\\export #{var}=#{value}' -i #{profile_file}"
+    action :run
+  end
+end
